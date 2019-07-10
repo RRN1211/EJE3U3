@@ -1,0 +1,22 @@
+const sgMail = require("@sendgrid/mail");
+const config = require("../_config");
+
+sgMail.setApiKey(config.SENDGRID_APIKEY);
+
+function sendm(msg){
+    msg["from"] = config.sender_email;
+    sgMail.send(msg)
+    .then(
+        (data) =>{
+            console.log("Exito");
+            console.log(data);
+    }
+    )
+    .catch(
+        (err) =>{
+            console.log("Falla");
+            console.log(err);
+        }
+    )
+}
+module.exports.send = sendm;

@@ -25,6 +25,9 @@ module.exports = (wagner) => {
     
     router.get('/insertarUser',(req,res)=>
         userCtrl.insertarUser(req,res));
+
+    router.get('/activarusuario/:id',(req, res)=>
+        userCtrl.updateStatus(req, res));
         
     return router;
 }

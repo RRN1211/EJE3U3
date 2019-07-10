@@ -3,10 +3,11 @@ const path = require('path');
 const status = require('http-status');
 const jwt = require('jsonwebtoken');
 const _config = require('../_config');
+const enviarMail = require('../utils/sendmail');
 
 let _user;
 
-const csvFilePath='F:\\AplicacionesEmpresariales\\U3\\ejercicio01\\controllers\\User.csv'
+const csvFilePath='F:\\AplicacionesEmpresariales\\U3\\ejercicio01\\controllers\\Users.csv'
 const csv = require('csvtojson');
 
 const insertarUser = async (req, res) => {
@@ -35,6 +36,20 @@ const createUser = (req, res) => {
 
     _user.create(user)
         .then((data)=> {
+            const env = {
+                to: user.email,
+                subject: "Registro exitoso",
+                text: `mensiaje enviado a ${user.name} es necesario validar su cuenta como usuario`,
+                html: `<strong>Estimado ${user.name}:</strong>
+                <p>Su cuenta ha sido creada de manera existosa. <br> 
+                    hace falta activar su cuenta por favor sigue la indicacion que se muestra
+                    a continuacion.<br>
+                    Acceda al siguiente enlace:
+                        <a href="http://localhost:3000/api/v1/usuarios/activarusuario/${data._id}">click aqui</a>
+                </p>`
+            };
+            console.log(env);
+            enviarMail.send(env);
             res.status(200);
             res.json({msg:"Usuario creado correctamente", data: data});
         })
@@ -114,6 +129,25 @@ const updateById = (req,res) =>{
         })
 }
 
+const updateStatus = (req,res) =>{
+    const {id} = req.params;
+    //const user = req.body;
+
+    const params = {
+        _id:id
+    }
+    
+    _user.findByIdAndUpdate(params,{$set:{activate:true}})
+        .then((data)=>{
+            res.status(status.OK);
+            res.json({msg:"Usuario activado",data:data});
+        })
+        .catch((err)=>{
+            res.status(status.NOT_FOUND);
+            res.json({msg:"Error, documento no actualizado",err:err});
+        })
+}
+
 const login = (req , res) => {
     const {email,password} = req.params;
     let query = {email: email, password:password};
@@ -150,6 +184,7 @@ module.exports = (User) => {
         updateById,
         findUne,
         login,
-        insertarUser
+        insertarUser,
+        updateStatus
     });
 }
